@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Keyboard, ScrollView} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Keyboard, ScrollView,   ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getDocs, collection, addDoc, query, where } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Asegúrate de importar correctamente tu configuración de Firebase
@@ -131,10 +131,15 @@ const ReferenceConteoScreen = ({ route }) => {
   };
 
   return (
+    <ImageBackground
+    source={require('../assets/FondoConteo_Mesa de trabajo 1.png')}
+    style={styles.container}
+    resizeMode="cover"
+  >
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Linha: {line}</Text>
-        <Text style={styles.subtitle}>Referência</Text>
+        <Text style={styles.subtitle}>Referências</Text>
       </View>
       <View style={styles.referencesContainer}>
         {references.length > 0 ? (
@@ -231,10 +236,18 @@ const ReferenceConteoScreen = ({ route }) => {
   </View>
 </Modal>
     </View>
+
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+
+    paddingHorizontal: 0,
+  },
+
 
   inputCantidad:{  
     backgroundColor: '#0024d3',
@@ -249,11 +262,7 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   
-  container: {
-    flex: 1,
-    backgroundColor: '#0024d3',
-    paddingHorizontal: 0,
-  },
+
   headerContainer: {
     backgroundColor: '#0024d3',
     padding: 20,
@@ -281,7 +290,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 10,
-    width: 200,
+    width: '90%',
     alignItems: 'center',
   },
   referenceButtonText: {
@@ -296,12 +305,20 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 15,
     width: '90%',
     maxHeight: '80%', // Limita la altura del modal para que el contenido no se desborde
-    alignItems: 'center', // Centra el contenido horizontalmente
+    alignItems: 'center',
   },
+  modalHeaderText: { 
+    fontWeight: 'bold', // Centra el contenido horizontalmente
+    fontSize: 18,
+    marginBottom: 40,
+    marginTop: 10,
+   }
+  
+  ,
   materialRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -314,6 +331,7 @@ const styles = StyleSheet.create({
     textAlign: 'center', // Centra el texto dentro de cada columna
     fontSize: 16,
     color: '#000',
+
   },
   counterContainer: {
     flexDirection: 'row',
@@ -347,7 +365,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Asegura que el contenido esté centrado en el eje horizontal
   },
   closeModalButton: {
-    backgroundColor: '#0024d3',
+    backgroundColor: '#f90057',
     padding: 10,
     borderRadius: 10,
     alignItems: 'center',

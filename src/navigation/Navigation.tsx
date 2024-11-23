@@ -13,6 +13,8 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AdminScreen from '../../screens/AdminScreen';
 
+
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -160,8 +162,8 @@ export default function Navigation() {
 // Estilos
 const styles = StyleSheet.create({
   forviaImage: {
-    width: 40,
-    height: 40,
+    width: 55,
+    height: 55,
   },
   forviaImageLarge: {
     width: 100,
@@ -175,10 +177,10 @@ const styles = StyleSheet.create({
     top: -15,
   },
   circle: {
-    elevation: 3,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
     shadowRadius: 4,
     backgroundColor: '#0024d3',
     borderRadius: 100,

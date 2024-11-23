@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   referenceButton: {
-    backgroundColor: '#0024d3',
+    backgroundColor: '#001ead',
     padding: 30,
     borderRadius: 10,
     justifyContent: 'flex-end',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingLeft: 20,
     paddingRight: 20,
-    backgroundColor: '#0024d3',
+    backgroundColor: '#001ead',
     paddingBottom: 15,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ccc',
   },
   columnHeader: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
     width: '30%',
     textAlign: 'left',
@@ -268,13 +268,13 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 16,
     width: '30%',
-    textAlign: 'left',
+    textAlign: 'center',
     paddingLeft: 10,
   },
   verticalDivider: {
-    width: 0.4,
-    backgroundColor: '#ccc',
-    marginHorizontal: 1,
+    width: 0.1,
+    backgroundColor: '#fff',
+    marginHorizontal: 5,
   },
   errorContainer: {
     flex: 1,

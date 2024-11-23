@@ -133,7 +133,7 @@ const closeModal = () => {
 
 return (
   <ImageBackground
-    source={require('../assets/backLinhas.png')}
+    source={require('../assets/Fondopng.png')}
     style={styles.container}
     resizeMode="cover"
   >
