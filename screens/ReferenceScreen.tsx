@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
-import references from '../data/references.json'; // Asegúrate de que la ruta sea correcta
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';  // Importa Firebase
 
 interface Material {
   name: string;
@@ -12,19 +13,20 @@ interface Material {
 interface Reference {
   reference: string;
   materials: Material[];
+  line: string;  // Agregar la línea de producción a cada referencia
 }
 
 interface ReferencesData {
-  [key: string]: Reference[];
+  [key: string]: Reference[];  // Agrupar referencias por línea de producción
 }
 
 const ReferenceScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
 
-  // Asegurarse de que el parámetro 'line' exista, si no, mostrar algo por defecto o manejarlo
   const { line } = route.params || { line: null };
 
+  const [references, setReferences] = useState<ReferencesData>({});
   const [selectedReference, setSelectedReference] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -39,6 +41,37 @@ const ReferenceScreen: React.FC = () => {
     );
   }
 
+  // Obtener las referencias desde Firebase
+  const fetchReferences = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'references')); // Obtén todas las referencias
+      const referencesData: ReferencesData = {};
+      
+      querySnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const line = data.line || 'Unknown'; // Asumiendo que cada referencia tiene un campo 'line'
+        
+        if (!referencesData[line]) {
+          referencesData[line] = [];
+        }
+
+        referencesData[line].push({
+          reference: data.reference,
+          materials: data.materials,
+          line,
+        });
+      });
+
+      setReferences(referencesData);
+    } catch (error) {
+      console.error('Erro ao buscar referências:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReferences();  // Cargar las referencias desde Firebase
+  }, []);
+
   // Manejar la selección de referencia y mostrar el modal
   const handleReferenceClick = (reference: string) => {
     setSelectedReference(reference);
@@ -47,7 +80,7 @@ const ReferenceScreen: React.FC = () => {
 
   // Obtener los materiales para una referencia específica
   const getMaterials = (reference: string): Material[] => {
-    const referenceData = references[line] as Reference[];
+    const referenceData = references[line] || [];
     const selectedRef = referenceData.find((ref) => ref.reference === reference);
     return selectedRef ? selectedRef.materials : [];
   };
@@ -62,19 +95,15 @@ const ReferenceScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const referenceData = references as ReferencesData;
-
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>
-        Referência -{line}
-        </Text>
+        <Text style={styles.headerTitle}>Referência - {line}</Text>
       </View>
 
       <View style={styles.innerContainer}>
         <FlatList
-          data={referenceData[line]}
+          data={references[line] || []}
           renderItem={renderReference}
           keyExtractor={(item) => item.reference}
           numColumns={3} // Mostrar en columnas de a 3
@@ -132,6 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0024d3',
     padding: 20,
     width: '100%',
+    paddingTop: 80,
   },
   headerTitle: {
     fontSize: 24,

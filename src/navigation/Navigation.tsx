@@ -2,30 +2,29 @@
 import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Image, StyleSheet, Alert, Button, Text } from 'react-native';
+import { View, Image, StyleSheet, Text, Modal, Button } from 'react-native';
 import HomeScreen from '../../screens/HomeScreen';
 import ConteoScreen from '../../screens/ConteoScreen';
 import ProductionLineScreen from '../../screens/ProductionLineScreen';
-import SignInScreen from '../../screens/SignInScreen';
-import SignUpScreen from '../../screens/SignUpScreen';
 import ReferenceScreen from '../../screens/ReferenceScreen';
 import ReferenceConteoScreen from '../../screens/ReferenceConteoScreen';
-import { auth } from '../../firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { firestore } from '../../firebaseConfig';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AdminScreen from '../../screens/AdminScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 // Componente TabNavigator
+// Componente TabNavigator
 function MainTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
+        headerShown: false, // Oculta el header de cada tab
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: '#fff', // Aquí cambiamos el color a #0024d3
           borderTopWidth: 0,
           borderRadius: 100,
           elevation: 3,
@@ -34,123 +33,127 @@ function MainTabNavigator() {
           shadowOpacity: 0.1,
           shadowRadius: 4,
           height: 70,
-          marginBottom: 10,
+          marginBottom: 15,
+          paddingBottom: 10,
           marginHorizontal: 20,
         },
       }}
     >
       <Tab.Screen 
-        name="Producción" 
+        name="Produção" 
         component={ProductionLineScreen} 
         options={{
-          tabBarLabel: '',
+          tabBarLabel: 'Picking',
           tabBarIcon: ({ color }) => <MaterialIcons name="blur-linear" size={30} color="black" />,
-          header: () => <CustomHeader />,
         }} 
       />
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
         options={{
-          tabBarLabel: 'Inicio',
+          tabBarLabel: 'Início',
           tabBarIcon: () => (
             <View style={styles.homeIconContainer}>
               <View style={styles.circle}>
-                <Image source={require('../../assets/forvia.png')} style={styles.forviaImage} />
+                <Image source={require('../../assets/forvia-05.png')} style={styles.forviaImage} />
               </View>
             </View>
           ),
-          header: () => <CustomHeader />,
         }} 
       />
       <Tab.Screen 
         name="Conteo" 
         component={ConteoScreen} 
         options={{
-          tabBarLabel: '',
+          tabBarLabel: 'Contagem',
           tabBarIcon: ({ color }) => <AntDesign name="calculator" size={28} color="black" />,
-          header: () => <CustomHeader />,
         }} 
       />
-      
       <Tab.Screen 
         name="ReferenceConteo" 
         component={ReferenceConteoScreen} 
-        options={{ 
-          header: () => <CustomHeader />, 
-          tabBarButton: () => null }}
-         // Ocultar el botón de la pestaña
+        options={{ tabBarButton: () => null }} 
       />
       <Tab.Screen 
         name="ReferenceScreen" 
         component={ReferenceScreen} 
-        options={{
-          header: () => <CustomHeader />,
-          tabBarButton: () => null }} // Ocultar el botón de la pestaña
+        options={{ tabBarButton: () => null }} 
+      />
+      <Tab.Screen 
+        name="Admin" 
+        component={AdminScreen} 
+        options={{ tabBarButton: () => null }} 
       />
     </Tab.Navigator>
   );
 }
 
-// Componente de encabezado personalizado
-const CustomHeader = ({ userName }) => {
-  const handleLogout = () => {
-    auth.signOut().then(() => {
-      console.log('Sesión cerrada con éxito');
-    }).catch(error => {
-      console.error('Error al cerrar sesión:', error);
-    });
-  };
+
+// Componente de bienvenida inicial
+const WelcomeScreen = ({ onWelcomeComplete }) => {
+  useEffect(() => {
+    const timer = setTimeout(onWelcomeComplete, 5000); // Mostrar por 3 segundos
+    return () => clearTimeout(timer);
+  }, [onWelcomeComplete]);
 
   return (
-    <View style={styles.header}>
-      <Text style={styles.headerTitle}>Olá {userName}</Text>
-      <Button title="Terminar Sessão" onPress={handleLogout} color="#0024d3" />
+    <View style={styles.welcomeContainer}>
+      <Image source={require('../../assets/forvia-05.png')} style={styles.forviaImageLarge} />
+      <Text style={styles.welcomeText}>Bem-vindo à Comas App</Text>
+      <Text style={styles.descriptionText}>A melhor solução para a gestão de produção na sua empresa</Text>
     </View>
   );
 };
 
-// Componente de navegación principal
+// Componente principal de navegación
 export default function Navigation() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('Usuario'); // Estado para el nombre del usuario
+  const [isWelcomeShown, setIsWelcomeShown] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log('User state changed:', user);
-      setIsLoggedIn(!!user);
-      if (user) {
-        // Si el usuario está autenticado, busca su nombre en Firestore
-        const userRef = firestore.collection('users').doc(user.uid); // Cambia 'users' por el nombre de tu colección
-        userRef.get().then((doc) => {
-          if (doc.exists) {
-            setUserName(doc.data().name); // Asegúrate de que 'name' es el campo correcto en Firestore
-          } else {
-            console.log('No se encontró el documento del usuario');
-          }
-        }).catch((error) => {
-          console.error('Error al obtener el documento:', error);
-        });
-      } else {
-        setUserName('Usuario'); // Restablece a 'Usuario' si no hay sesión
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  const handleWelcomeComplete = () => {
+    setIsWelcomeShown(true);
+    setIsModalVisible(true); // Mostrar modal después de bienvenida
+  };
+
+  const handleAcceptModal = () => {
+    setIsModalVisible(false); // Cerrar modal y redirigir al HomeScreen
+  };
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {isLoggedIn ? (
-        <Stack.Screen name="Main">
-          {() => <MainTabNavigator userName={userName} />}
-        </Stack.Screen>
-      ) : (
-        <>
-          <Stack.Screen name="Auth" component={SignInScreen} />
-          <Stack.Screen name="SignUp" component={SignUpScreen} />
-        </>
-      )}
-    </Stack.Navigator>
+    <>
+      {/* Mostrar el modal después de la bienvenida */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Esta aplicação não é propriedade da Forvia Faurecia, 
+              mas foi concebida e desenvolvida como uma ferramenta de apoio 
+              para otimizar o fluxo de trabalho e facilitar a gestão de produção.
+            </Text>
+            <Button title="Aceitar" onPress={handleAcceptModal} color="#0024d3" />
+          </View>
+        </View>
+      </Modal>
+
+      <Stack.Navigator 
+        screenOptions={{
+          headerShown: false, // Oculta el encabezado de todas las pantallas del stack
+        }}
+      >
+        {!isWelcomeShown ? (
+          <Stack.Screen name="Welcome">
+            {() => <WelcomeScreen onWelcomeComplete={handleWelcomeComplete} />}
+          </Stack.Screen>
+        ) : (
+          <Stack.Screen name="Main" component={MainTabNavigator} />
+        )}
+      </Stack.Navigator>
+    </>
   );
 }
 
@@ -159,6 +162,11 @@ const styles = StyleSheet.create({
   forviaImage: {
     width: 40,
     height: 40,
+  },
+  forviaImageLarge: {
+    width: 100,
+    height: 100,
+    marginBottom: 20,
   },
   homeIconContainer: {
     alignItems: 'center',
@@ -179,17 +187,41 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  header: {    
-    paddingTop: 30,
-    backgroundColor: '#0024d3',
-    padding: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  welcomeContainer: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#0024d3',
   },
-  headerTitle: {
-    paddingLeft:10,
-    color: '#ffffff',
-    fontSize: 20,
+  welcomeText: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  descriptionText: {
+    fontSize: 16,
+    color: '#ddd',
+    marginTop: 5,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
   },
 });

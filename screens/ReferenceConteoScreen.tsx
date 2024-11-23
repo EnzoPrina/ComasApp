@@ -1,16 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, Keyboard, ScrollView} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import referencesData from '../data/references.json';
+import { getDocs, collection, addDoc, query, where } from 'firebase/firestore';
+import { db } from '../firebaseConfig'; // Asegúrate de importar correctamente tu configuración de Firebase
+import Icon from 'react-native-vector-icons/MaterialIcons'; // Importa el ícono de Material Icons
 
 const ReferenceConteoScreen = ({ route }) => {
-  const { line } = route.params || {};
+  const { line } = route.params || {}; // Obtenemos la línea actual
   const [references, setReferences] = useState([]);
   const [selectedReference, setSelectedReference] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [materialQuantities, setMaterialQuantities] = useState({});
   const [cantidadARealizar, setCantidadARealizar] = useState('');
+  const [checkClosedKeyboard, setCheckClosedKeyboard] = useState(false); // Estado para manejar el checkbox
+
+  // Función para obtener las referencias desde Firebase, filtradas por la línea actual
+  const fetchReferences = async () => {
+    try {
+      const q = query(
+        collection(db, 'references'),
+        where('line', '==', line)  // Aquí filtras por la línea actual
+      );
+      const querySnapshot = await getDocs(q);
+      const firebaseReferences = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setReferences(firebaseReferences); // Actualiza las referencias en el estado
+    } catch (error) {
+      console.error('Error al obtener las referencias:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (line) {
+      fetchReferences();
+    } else {
+      console.warn('La línea no está definida');
+    }
+  }, [line]);
 
   useEffect(() => {
     const loadQuantities = async () => {
@@ -27,11 +56,6 @@ const ReferenceConteoScreen = ({ route }) => {
     };
 
     loadQuantities();
-
-    if (line) {
-      const lineReferences = referencesData[line];
-      setReferences(lineReferences || []);
-    }
   }, [line]);
 
   useEffect(() => {
@@ -41,6 +65,15 @@ const ReferenceConteoScreen = ({ route }) => {
 
     saveQuantities();
   }, [materialQuantities]);
+
+  const addNewReference = async (newReferenceData) => {
+    try {
+      await addDoc(collection(db, 'references'), newReferenceData); // Agregar referencia a Firebase
+      fetchReferences(); // Recargar las referencias
+    } catch (error) {
+      console.error('Error al agregar nueva referencia:', error);
+    }
+  };
 
   const handleReferenceSelect = async (reference) => {
     setSelectedReference(reference);
@@ -81,10 +114,6 @@ const ReferenceConteoScreen = ({ route }) => {
     setCantidadARealizar('');
   };
 
-  const handleCantidadChange = (value) => {
-    setCantidadARealizar(value);
-  };
-
   const handleCloseModal = async () => {
     const updatedCantidadARealizar = await AsyncStorage.getItem('cantidadARealizar');
     const cantidadData = updatedCantidadARealizar ? JSON.parse(updatedCantidadARealizar) : {};
@@ -92,6 +121,12 @@ const ReferenceConteoScreen = ({ route }) => {
 
     await AsyncStorage.setItem('cantidadARealizar', JSON.stringify(cantidadData));
     await AsyncStorage.setItem('materialQuantities', JSON.stringify(materialQuantities));
+
+    // Cerrar el teclado si el checkbox está marcado
+    if (checkClosedKeyboard) {
+      Keyboard.dismiss();
+    }
+
     setModalVisible(false);
   };
 
@@ -113,79 +148,107 @@ const ReferenceConteoScreen = ({ route }) => {
             </TouchableOpacity>
           ))
         ) : (
-          <Text>No hay referencias disponibles para esta línea.</Text>
+          <Text>Não existem referências disponíveis para esta linha.</Text>
         )}
       </View>
 
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalHeaderText}>Referencia: {selectedReference?.reference}</Text>
-            <TextInput
-              style={styles.inputCantidad}
-              placeholder="Cantidad a realizar"
-              value={cantidadARealizar}
-              onChangeText={handleCantidadChange}
-              keyboardType="numeric"
-              placeholderTextColor="#ffffff"
-            />
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalHeaderText}>Referência: {selectedReference?.reference}</Text>
 
-            <View style={styles.materialList}>
-              <View style={styles.materialRow}>
-                <Text style={styles.materialColumnHeader}>Ref</Text>
-                <Text style={styles.materialColumnHeader}>Material</Text>
-                <Text style={styles.materialColumnHeader}>Cantidad</Text>
-                <Text style={styles.materialColumnHeader}>Sumas</Text>
+      <View style={styles.cantidadInputContainer}>
+  <TextInput
+    style={styles.inputCantidad}
+    placeholder="Cantidad a realizar"
+    value={cantidadARealizar}
+    onChangeText={setCantidadARealizar}
+    keyboardType="numeric"
+    placeholderTextColor="#ffffff"
+  />
+  <View style={styles.flexRow}>
+    <TouchableOpacity
+      onPress={() => {
+        setCheckClosedKeyboard(!checkClosedKeyboard); // Alterna el checkbox
+        Keyboard.dismiss(); // Cierra el teclado al marcar el checkbox
+      }}
+      style={styles.checkboxContainer}
+    >
+      <Icon
+        name={checkClosedKeyboard ? "check-box" : "check-box-outline-blank"}
+        size={24}
+        color="#0024d3"
+      />
+    </TouchableOpacity>
+    <Text style={styles.checkboxLabel}>Confirmar</Text>
+  </View>
+</View>
+
+      {/* Títulos para las clasificaciones */}
+      <View style={styles.materialRow}>
+        <Text style={styles.materialText}>Ref</Text>
+        <Text style={styles.materialText}>Material</Text>
+        <Text style={styles.materialText}>Cantidad</Text>
+        <Text style={styles.materialText}>Suma</Text>
+      </View>
+
+      <ScrollView style={styles.materialList} contentContainerStyle={styles.scrollContent}>
+        {materials.map((material) => {
+          const currentQuantity =
+            materialQuantities[selectedReference?.reference]?.[material.name] || 0;
+
+          return (
+            <View key={material.name} style={styles.materialRow}>
+              <Text style={styles.materialText}>{material.material_reference}</Text>
+              <Text style={styles.materialText}>{material.name}</Text>
+              <Text style={styles.materialText}>{material.quantity}</Text>
+              <View style={styles.counterContainer}>
+                <TouchableOpacity
+                  onPress={() => handleMaterialChange(material.name, -1, material.quantity)}
+                  style={styles.counterButton}
+                >
+                  <Text style={styles.counterButtonText}>-</Text>
+                </TouchableOpacity>
+                <View style={styles.counterDisplay}>
+                  <Text style={styles.counterText}>{currentQuantity}</Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleMaterialChange(material.name, 1, material.quantity)}
+                  style={styles.counterButton}
+                >
+                  <Text style={styles.counterButtonText}>+</Text>
+                </TouchableOpacity>
               </View>
-
-              {materials.map((material) => {
-                const currentQuantity = materialQuantities[selectedReference?.reference]?.[material.name] || 0;
-
-                return (
-                  <View key={material.name} style={styles.materialRow}>
-                    <Text style={styles.materialText}>{material.material_reference}</Text>
-                    <Text style={styles.materialText}>{material.name}</Text>
-                    <Text style={styles.materialText}>{material.quantity}</Text>
-                    <View style={styles.counterContainer}>
-                      <TouchableOpacity
-                        onPress={() => handleMaterialChange(material.name, -1, material.quantity)}
-                        style={styles.counterButton}
-                      >
-                        <Text style={styles.counterButtonText}>-</Text>
-                      </TouchableOpacity>
-                      <View style={styles.counterDisplay}>
-                        <Text style={styles.counterText}>{currentQuantity}</Text>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => handleMaterialChange(material.name, 1, material.quantity)}
-                        style={styles.counterButton}
-                      >
-                        <Text style={styles.counterButtonText}>+</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                );
-              })}
-
-              <TouchableOpacity
-                onPress={handleResetCounter}
-                style={styles.resetButton}
-              >
-                <Text style={styles.resetButtonText}>Reiniciar contador</Text>
-              </TouchableOpacity>
             </View>
+          );
+        })}
+      </ScrollView>
 
-            <TouchableOpacity onPress={handleCloseModal} style={styles.closeModalButton}>
-              <Text style={styles.closeModalButtonText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TouchableOpacity onPress={handleCloseModal} style={styles.closeModalButton}>
+        <Text style={styles.closeModalButtonText}>Fechar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+
+  inputCantidad:{  
+    backgroundColor: '#0024d3',
+    padding: 10,    borderRadius: 10, color: '#fff',
+  },
+  checkboxContainer: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  checkboxLabel: {
+    color: '#002d3',
+    marginLeft: 5,
+  },
+  
   container: {
     flex: 1,
     backgroundColor: '#0024d3',
@@ -194,6 +257,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: '#0024d3',
     padding: 20,
+    paddingTop: 80,
     borderRadius: 10,
     marginBottom: 20,
   },
@@ -208,25 +272,21 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   referencesContainer: {
-    alignSelf: 'stretch',
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderRadius: 30,
-    width: '100%',
-    padding: 20,
-    marginTop: 30,
-    marginBottom: -30,
+    marginTop: 15,
+    alignItems: 'center',
   },
   referenceButton: {
-    backgroundColor: '#0024d3',
-    padding: 15,
-    borderRadius: 10,
+    backgroundColor: '#ffffff',
     marginBottom: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    width: 200,
+    alignItems: 'center',
   },
   referenceButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#0024d3',
+    fontSize: 18,
   },
   modalContainer: {
     flex: 1,
@@ -235,97 +295,81 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%',
+    backgroundColor: '#ffffff',
     padding: 20,
-    backgroundColor: '#fff',
     borderRadius: 10,
-    alignItems: 'center',
-  },
-  modalHeaderText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  inputCantidad: {
-    backgroundColor: '#0024d3',
-    borderRadius: 5,
-    width: '100%',
-    textAlign: 'center',
-    color: '#ffffff',
-    marginBottom: 20,
-    padding: 5,
-  },
-  materialList: {
-    width: '100%',
+    width: '90%',
+    maxHeight: '80%', // Limita la altura del modal para que el contenido no se desborde
+    alignItems: 'center', // Centra el contenido horizontalmente
   },
   materialRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
     alignItems: 'center',
-  },
-  materialColumnHeader: {
-    fontWeight: 'bold',
-    width: '20%',
-    textAlign: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    width: '100%',
   },
   materialText: {
-    width: '20%',
-    textAlign: 'center',
+    flex: 1,
+    textAlign: 'center', // Centra el texto dentro de cada columna
+    fontSize: 16,
+    color: '#000',
   },
   counterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Centra los botones de suma/resta
   },
   counterButton: {
     backgroundColor: '#0024d3',
     borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    padding: 5,
     marginHorizontal: 5,
   },
   counterButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   counterDisplay: {
-    backgroundColor: '#0024d3',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    minWidth: 40,
+    alignItems: 'center',
   },
   counterText: {
-    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  resetButton: {
-    marginTop: 20,
-/*     backgroundColor: '#0024d3', */
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+  materialList: {
+    width: '100%',
+    marginTop: 10,
   },
-  resetButtonText: {
-    color: '#ff0000',
-    fontWeight: 'bold',
+  scrollContent: {
+    alignItems: 'center', // Asegura que el contenido esté centrado en el eje horizontal
   },
   closeModalButton: {
-    width: '100%',
-    marginTop: 20,
     backgroundColor: '#0024d3',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    textAlign: 'center',
+    padding: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+    width: '100%',
   },
   closeModalButtonText: {
     color: '#ffffff',
-    fontWeight: 'bold',    textAlign: 'center',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  cantidadInputContainer: {
+    flexDirection: 'row', // Alinea los elementos en fila
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '80%',
+    gap: 10, // Agrega un pequeño espacio entre las columnas
+  },
+  flexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 

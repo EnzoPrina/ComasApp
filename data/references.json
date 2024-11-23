@@ -18,10 +18,23 @@
         { "name": "Cupelas Exteriores 2", "material_reference": "6591", "quantity": 25 },
         { "name": "Cupelas Interiores 1", "material_reference": "7894", "quantity": 20 },
         { "name": "Cupelas Interiores 2", "material_reference": "7895", "quantity": 40 },
-        { "name": "Tubo 1", "material_reference": "6603", "quantity": 14 },
+        { "name": "Tubo 1", "material_reference": "6603", "quantity": 16 },
         { "name": "Tubo 2", "material_reference": "6597", "quantity": 14 },
-        { "name": "Surdina", "material_reference": "4210", "quantity": 20 },
+        { "name": "Surdina", "material_reference": "4210", "quantity": 19 },
         { "name": "Envolvente", "material_reference": "5923", "quantity": 250 }
+      ]
+    },
+    
+    {
+      "reference": "7626",
+      "materials": [
+        { "name": "Cupelas Exteriores 1", "material_reference": "1422", "quantity": 25 },
+        { "name": "Cupelas Exteriores 2", "material_reference": "7126", "quantity": 25 },
+        { "name": "Cupelas Interiores 1", "material_reference": "7731", "quantity": 20 },
+        { "name": "Cupelas Interiores 2", "material_reference": "7732", "quantity": 40 },
+        { "name": "Tubo 1", "material_reference": "3435", "quantity": 16 },
+        { "name": "Tubo 2", "material_reference": "3436", "quantity": 14 },
+        { "name": "Envolvente", "material_reference": "7618", "quantity": 250 }
       ]
     },
     {
@@ -34,8 +47,8 @@
         { "name": "Tubo", "material_reference": "9722", "quantity": 30 },
         { "name": "Tubo", "material_reference": "9723", "quantity": 14 },
         { "name": "Tubo", "material_reference": "9725", "quantity": 40 },
-        { "name": "Surdina", "material_reference": "4210", "quantity": 220 },
-        { "name": "Envolvente", "material_reference": "7762", "quantity": 270 }
+        { "name": "Surdina", "material_reference": "4210", "quantity": 19 },
+        { "name": "Envolvente", "material_reference": "7762", "quantity": 250 }
       ]
     },
     {
@@ -49,7 +62,7 @@
         { "name": "Tubo Grande", "material_reference": "9055", "quantity": 36 },
         { "name": "Tubo", "material_reference": "9058", "quantity": 28 },
         { "name": "Surdina x2", "material_reference": "3828", "quantity": 20 },
-        { "name": "Lã", "material_reference": "8937", "quantity": 20 },
+        { "name": "Lã", "material_reference": "8937", "quantity": 8 },
         { "name": "Envolvente", "material_reference": "7766", "quantity": 250 }
       ]
     },
@@ -64,7 +77,7 @@
         { "name": "Tubo Grande", "material_reference": "9055", "quantity": 36 },
         { "name": "Tubo", "material_reference": "9058", "quantity": 28 },
         { "name": "Surdina x2", "material_reference": "3828", "quantity": 20 },
-        { "name": "Lã", "material_reference": "8937", "quantity": 20 },
+        { "name": "Lã", "material_reference": "8937", "quantity": 8 },
         { "name": "Envolvente", "material_reference": "9052", "quantity": 250 }
       ]
     },
@@ -81,17 +94,43 @@
   ],
   "COMAS 2": [
     {
-      "reference": "9298",
+      "reference": "9596",
       "materials": [
-        { "name": "Cupelas Exteriores", "material_reference": "4883", "quantity": 110 },
-        { "name": "Cupelas Interiores", "material_reference": "4902", "quantity": 160 },
-        { "name": "Tubo", "material_reference": "4912", "quantity": 210 },
-        { "name": "Envolvente", "material_reference": "4922", "quantity": 260 }
+        { "name": "Cupelas Exteriores", "material_reference": "8507", "quantity": 30 },
+        { "name": "Cupelas Exteriores 2", "material_reference": "8508", "quantity": 30 },
+        { "name": "Cupela Interior x2", "material_reference": "9299", "quantity": 30 },
+        { "name": "Tubo Laser", "material_reference": "1622", "quantity": 50 },
+        { "name": "Envolvente", "material_reference": "9588", "quantity": 250 }
+      ]
+    },
+    {
+      "reference": "9647",
+      "materials": [
+        { "name": "Cupelas Exteriores 1", "material_reference": "8501", "quantity": 30 },
+        { "name": "Cupelas Exteriores 2", "material_reference": "8500", "quantity": 30 },
+        { "name": "Tubo x2", "material_reference": "5703", "quantity": 14 },
+        { "name": "Tubo Laser", "material_reference": "1622", "quantity": 50 },
+        { "name": "Envolvente", "material_reference": "9588", "quantity": 250 }
+      ]
+    },
+    {
+      "reference": "VW 1837",
+      "materials": [
+        { "name": "Cupelas Exteriores x2", "material_reference": "8906", "quantity": 60 },
+        { "name": "Envolvente", "material_reference": "6300", "quantity": 250 }
+      ]
+    },
+    {
+      "reference": "VW 2373",
+      "materials": [
+        { "name": "Cupelas Exteriores 1", "material_reference": "3081", "quantity": 30 },
+        { "name": "Cupelas Exteriores 2", "material_reference": "3083", "quantity": 30 },
+        { "name": "SubConjunto ", "material_reference": "3083", "quantity": 30 },
+        { "name": "Envolvente", "material_reference": "2600", "quantity": 250 }
       ]
     }
   ],
-  "COMAS 3": [
-    {
+  "COMAS 3": [{
       "reference": "1261",
       "materials": [
         { "name": "Cupelas Exteriores", "material_reference": "4884", "quantity": 130 },
@@ -100,5 +139,14 @@
         { "name": "Envolvente", "material_reference": "4923", "quantity": 280 }
       ]
     }
-  ]
+  ],
+  "RE-CAMBIO": [{
+    "reference": "5613",
+    "materials":[
+      { "name": "Cupelas Exteriores", "material_reference": "4884", "quantity": 130 },
+      { "name": "Cupelas Interiores", "material_reference": "4903", "quantity": 170 },
+      { "name": "Tubo", "material_reference": "4913", "quantity": 230 },
+      { "name": "Envolvente", "material_reference": "4923", "quantity": 280 }
+    ]
+  }]
 }

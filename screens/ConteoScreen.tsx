@@ -113,16 +113,19 @@ const ConteoScreen: React.FC = () => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.lineButtonsContainer}>
             <TouchableOpacity onPress={() => handleLineButtonPress('COMAS 1')} style={styles.lineButton}>
-              <Text style={styles.lineButtonText}>COMAS 1</Text>
+          <Text style={styles.lineButtonText}>COMAS 1</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleLineButtonPress('COMAS 2')} style={styles.lineButton}>
-              <Text style={styles.lineButtonText}>COMAS 2</Text>
+          <Text style={styles.lineButtonText}>COMAS 2</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleLineButtonPress('COMAS 3')} style={styles.lineButton}>
-              <Text style={styles.lineButtonText}>COMAS 3</Text>
+          <Text style={styles.lineButtonText}>COMAS 3</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleLineButtonPress('Subconjunto')} style={styles.lineButton}>
-              <Text style={styles.lineButtonText}>Subconjunto</Text>
+          <Text style={styles.lineButtonText}>Subconjunto</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleLineButtonPress('RECAMBIO')} style={styles.lineButton}>
+          <Text style={styles.lineButtonText}>Recambio</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -193,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#0024d3',
   },
   title: {
-    paddingTop: 50,
+    paddingTop: 80,
     fontSize: 23,
     fontWeight: 'bold',
     marginBottom: 20,

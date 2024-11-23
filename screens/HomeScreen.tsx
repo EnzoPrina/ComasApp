@@ -1,18 +1,24 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Alert, ScrollView, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Alert, FlatList } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Asegúrate de instalar esta dependencia
-import { AntDesign, FontAwesome } from '@expo/vector-icons'; // Importamos los iconos
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 
 const HomeScreen = ({ navigation, route }) => {
   const userName = route.params?.userName || 'Usuario';
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState([]);
   const [editingNoteId, setEditingNoteId] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false); // Control del modal
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedTurno, setSelectedTurno] = useState('');
+  const [turnoOptions] = useState(['Azul', 'Verde', 'Preto']);
+
+  
+  
 
   useEffect(() => {
-    loadNotes(); // Cargar notas al inicio
+    loadNotes();
   }, []);
 
   const loadNotes = async () => {
@@ -36,7 +42,7 @@ const HomeScreen = ({ navigation, route }) => {
 
   const addNote = async () => {
     if (note.trim()) {
-      const newNote = { id: Date.now().toString(), text: note, completed: false }; // Asignar un ID único
+      const newNote = { id: Date.now().toString(), text: note, completed: false };
       const updatedNotes = editingNoteId 
         ? notes.map(n => n.id === editingNoteId ? { ...n, text: note } : n) 
         : [...notes, newNote];
@@ -70,25 +76,52 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const handleLogout = () => {
-    // Lógica para cerrar sesión (podrías borrar datos, limpiar AsyncStorage, etc.)
-    AsyncStorage.clear(); // Ejemplo de limpieza de datos
-    setModalVisible(false); // Cerrar modal
-    navigation.replace('SignInScreen'); // Redirigir a Sign In
+    AsyncStorage.clear();
+    setModalVisible(false);
+    navigation.replace('SignInScreen');
   };
+
+  const handleTurnoChange = (turno) => {
+    setSelectedTurno(turno);
+  };
+
+  const handleSendMessage = () => {
+    console.log(`Mensaje enviado al turno ${selectedTurno}`);
+    setModalVisible(false);
+  };
+
+  const renderNote = ({ item }) => (
+    <View style={styles.noteContainer}>
+      <TouchableOpacity onPress={() => toggleComplete(item.id)}>
+        <AntDesign 
+          name={item.completed ? "checkcircle" : "checkcircleo"} 
+          size={24} 
+          color={item.completed ? "#4caf50" : "#ccc"} 
+        />
+      </TouchableOpacity>
+      <Text style={[styles.noteText, item.completed && styles.completedText]}>
+        {item.text}
+      </Text>
+      <TouchableOpacity onPress={() => deleteNote(item.id)}>
+      <EvilIcons name="trash" size={28} color="black" />
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.blueSection}>
-        <View style={styles.headerContainer}>
-
-
-        </View>
-        <Text style={styles.slogan}>Bem-vindo à Comas App, trabalhe de forma organizada com as contas na sua linha.</Text>
+{/*     <TouchableOpacity
+          style={styles.sendMessageButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.sendMessageButtonText}>Enviar Mensaje al Próximo Turno</Text>
+        </TouchableOpacity> */}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate('Producción')}
+            onPress={() => navigation.navigate('Produção')}
           >
             <Text style={styles.buttonText}>Linhas</Text>
             <Text style={styles.buttonText}>de Produção</Text>
@@ -108,48 +141,70 @@ const HomeScreen = ({ navigation, route }) => {
 
       <View style={styles.whiteSection}>
         <Text style={styles.notesTitle}>Notas</Text>
-        <ScrollView style={styles.notesInnerContainer} keyboardShouldPersistTaps="handled">
-          <TextInput
-            style={styles.input}
-            placeholder="Adicionar uma nota..."
-            value={note}
-            onChangeText={setNote}
-          />
-          <TouchableOpacity style={styles.addButton} onPress={addNote}>
-            <Text style={styles.addButtonText}>{editingNoteId ? 'Editar Nota' : 'Adicionar Nota'}</Text>
-          </TouchableOpacity>
-
-          <FlatList
-            data={notes}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.noteContainer}>
-                <TouchableOpacity onPress={() => deleteNote(item.id)}>
-                  <FontAwesome name="trash-o" size={24} color="black" /> 
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => startEditing(item.id, item.text)}
-                  style={[styles.noteBox, { textDecorationLine: item.completed ? 'line-through' : 'none' }]}>
-                  <Text style={[styles.noteText, item.completed && styles.completedNote]}>
-                    {item.text}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => toggleComplete(item.id)} style={styles.checkContainer}>
-                  <AntDesign name="checkcircleo" size={24} color="black" /> 
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        </ScrollView>
+        <TextInput
+          style={styles.input}
+          placeholder="Adicionar uma nota..."
+          value={note}
+          onChangeText={setNote}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addNote}>
+          <Text style={styles.addButtonText}>{editingNoteId ? 'Editar Nota' : 'Adicionar Nota'}</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item.id}
+          renderItem={renderNote}
+        />
       </View>
 
-      
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enviar Mensaje al Próximo Turno</Text>
+            
+            <Text style={styles.modalText}>Selecciona el turno:</Text>
+            <Picker
+              selectedValue={selectedTurno}
+              onValueChange={handleTurnoChange}
+              style={styles.picker}
+            >
+              {turnoOptions.map((turno, index) => (
+                <Picker.Item key={index} label={turno} value={turno} />
+              ))}
+            </Picker>
 
+            <TextInput
+              style={styles.input}
+              placeholder="Escribe tu mensaje aquí..."
+              multiline
+            />
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={handleSendMessage}
+              >
+                <Text style={styles.sendButtonText}>Enviar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -160,7 +215,7 @@ const styles = StyleSheet.create({
     flex: 0.4,
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
-    paddingTop: 50,
+    paddingTop: 80,
   },
   whiteSection: {
     marginTop: 50,
@@ -169,42 +224,19 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 30,
+    paddingBottom: 200,
   },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',backgroundColor: '#0024d3',
-  },
-  title: {backgroundColor: '#0024d3',
-    paddingTop: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    fontSize: 28,
-    fontFamily: 'Montserrat-Bold',
-    marginBottom: 10,
-  },
-  profileIcon: {
-    paddingTop: 20,
-  },
-  slogan: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Montserrat-Regular',
-    textAlign: 'left',
-    marginBottom: 30,
-  },
-  notesTitle: {
-    paddingTop: 20,
-    fontWeight: 'bold',
-    color: '#0024d3',
-    fontSize: 24,
-    fontFamily: 'Montserrat-Bold',
-    marginBottom: 10,
-  },
-  notesInnerContainer: {
+  sendMessageButton: {
+    backgroundColor: '#d2d6ec',
+    paddingVertical: 20,
     borderRadius: 15,
-    paddingTop: 30,
-    padding: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  sendMessageButtonText: {
+    color: '#0024d3',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -253,6 +285,7 @@ const styles = StyleSheet.create({
     width: '100%',
     fontSize: 14,
     backgroundColor: '#f9fbff',
+    marginTop: 10,
   },
   addButton: {
     backgroundColor: '#0024d3',
@@ -265,32 +298,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  noteContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  noteBox: {
-    flex: 1,
-    backgroundColor: '#f9fbff',
-    padding: 10,
-    marginHorizontal: 10,
-    borderRadius: 5,
-  },
-  noteText: {
-    fontSize: 16,
-  },
-  completedNote: {
-    textDecorationLine: 'line-through',
-    color: 'grey',
-  },
-  checkContainer: {
-    paddingLeft: 10,
-  },
-  spacer: {
-    width: 10,
   },
   modalContainer: {
     flex: 1,
@@ -311,15 +318,66 @@ const styles = StyleSheet.create({
     color: '#0024d3',
     marginBottom: 20,
   },
-  logoutButton: {
-    backgroundColor: '#0024d3',
+  modalText: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    marginTop: 20,
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  cancelButton: {
+    backgroundColor: '#ccc',
     paddingVertical: 10,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     borderRadius: 5,
   },
-  logoutButtonText: {
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  sendButton: {
+    backgroundColor: '#0024d3',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  sendButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  notesTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#0024d3',
+    marginBottom: 10,
+  },
+  spacer: {
+    width: 10,
+  },
+  noteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 10,
+  },
+  completedText: {
+    textDecorationLine: 'line-through',
+    color: '#999',
   },
 });
 
