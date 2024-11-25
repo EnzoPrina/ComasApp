@@ -86,7 +86,7 @@ const HomeScreen = ({ navigation, route }) => {
   };
 
   const handleSendMessage = () => {
-    console.log(`Mensaje enviado al turno ${selectedTurno}`);
+
     setModalVisible(false);
   };
 
@@ -156,51 +156,6 @@ const HomeScreen = ({ navigation, route }) => {
           renderItem={renderNote}
         />
       </View>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Enviar Mensaje al Próximo Turno</Text>
-            
-            <Text style={styles.modalText}>Selecciona el turno:</Text>
-            <Picker
-              selectedValue={selectedTurno}
-              onValueChange={handleTurnoChange}
-              style={styles.picker}
-            >
-              {turnoOptions.map((turno, index) => (
-                <Picker.Item key={index} label={turno} value={turno} />
-              ))}
-            </Picker>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Escribe tu mensaje aquí..."
-              multiline
-            />
-            
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.sendButton}
-                onPress={handleSendMessage}
-              >
-                <Text style={styles.sendButtonText}>Enviar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -216,15 +171,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'flex-start',
     paddingTop: 80,
+
   },
   whiteSection: {
-    marginTop: 50,
+    marginTop: -50,
     flex: 0.6,
     backgroundColor: '#fff',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 30,
-    paddingBottom: 200,
+    marginBottom: 0,
   },
   sendMessageButton: {
     backgroundColor: '#d2d6ec',
@@ -293,6 +249,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderRadius: 5,
     alignItems: 'center',
+    marginBottom: 10,
   },
   addButtonText: {
     color: 'white',

@@ -102,7 +102,10 @@ const WelcomeScreen = ({ onWelcomeComplete }) => {
     <View style={styles.welcomeContainer}>
       <Image source={require('../../assets/forvia-05.png')} style={styles.forviaImageLarge} />
       <Text style={styles.welcomeText}>Bem-vindo à Comas App</Text>
+     
       <Text style={styles.descriptionText}>A melhor solução para a gestão de produção na sua empresa</Text>
+      <Text style={styles.descriptionText}></Text>
+
     </View>
   );
 };
@@ -136,6 +139,10 @@ export default function Navigation() {
               Esta aplicação não é propriedade da Forvia Faurecia, 
               mas foi concebida e desenvolvida como uma ferramenta de apoio 
               para otimizar o fluxo de trabalho e facilitar a gestão de produção.
+            </Text>
+
+            <Text style={styles.modalTextDev}>
+            Desenvolvido por Enzo Prina
             </Text>
             <Button title="Aceitar" onPress={handleAcceptModal} color="#0024d3" />
           </View>
@@ -222,6 +229,14 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 16,
+    fontStyle: 'italic',
+    color: '#333',
+    marginBottom: 40,
+    textAlign: 'center',
+  },
+  modalTextDev: {
+    fontSize: 13,
+    fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
